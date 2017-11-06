@@ -3,12 +3,14 @@ package com.example.pau.locationtracker;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SyncStatusObserver;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
+import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
@@ -17,7 +19,6 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -26,7 +27,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -69,15 +69,72 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        marker =  mMap.addMarker(mo);
+
+        final DatabaseReference m = mDatabase.child("locations").child(FirebaseAuth.getInstance()
+                .getCurrentUser().getUid());
+
+        final DatabaseReference user = mDatabase.child("users").child(FirebaseAuth.getInstance()
+                .getCurrentUser().getUid());
+
+
+            m.child("loc").addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.hasChildren()) {
+                            final Double lat = (Double)dataSnapshot.child("latitude").getValue();
+                            final Double lon = (Double)dataSnapshot.child("longitude").getValue();
+
+                            user.child("email").addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    mo = new MarkerOptions().position(new LatLng(lat,lon)).title("User "+ dataSnapshot.child("email").getValue());
+                                    marker =  mMap.addMarker(mo);
+                                }
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {}
+                            });
+                        }else{
+                            marker =  mMap.addMarker(mo);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                }
+        );
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        float zoomLevel = 18.0f;
-        LatLng myCoordinates = new LatLng(location.getLatitude(), location.getLongitude());
-        marker.setPosition(myCoordinates);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel), 4000, null);
+        //Ja no peta si tirem enrere i tornem a entrar!
+        final float zoomLevel = 17.0f;
+        final LatLng myCoordinates = new LatLng(location.getLatitude(), location.getLongitude());
+        DatabaseReference m = mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
+                getUid());
+        m.child("loc").addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.hasChildren()) {
+                            Double lat = (Double)dataSnapshot.child("latitude").getValue();
+                            Double lon = (Double)dataSnapshot.child("longitude").getValue();
+                            LatLng latlon = new LatLng(lat, lon);
+                            //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlon, zoomLevel), 6000, null);
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlon, zoomLevel));
+                        }else{
+                            //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel), 6000, null);
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel));
+                        }
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                }
+        );
+
         mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
                 getUid()).child("loc").setValue(myCoordinates);
     }
@@ -115,7 +172,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        locationManager.requestLocationUpdates(provider, 1000, 4, this);
+        locationManager.requestLocationUpdates(provider, 3000, 4, this);
 
 
     }
