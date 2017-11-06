@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "269577847252-12l10kc52lfcccr2s33cor2lcvfukmoc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pau.locationtracker",
+            "certificate_hash": "68096bf8ab45fcb0093aa3e0dcdfb596b7bcde8e"
+          }
+        },
+        {
           "client_id": "269577847252-17bsp02784dbhhvr4d0mnj1qtdlngaqc.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "269577847252-17bsp02784dbhhvr4d0mnj1qtdlngaqc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

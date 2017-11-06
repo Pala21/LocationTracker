@@ -16,6 +16,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,9 +28,12 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -120,6 +125,8 @@ public class MainActivity extends AppCompatActivity {
                                     if (task.isSuccessful()) {
                                         Toast.makeText(MainActivity.this, "Email address is updated. Please sign in with new email id!", Toast.LENGTH_LONG).show();
                                         signOut();
+                                        mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
+                                                getUid()).child("email").setValue(newEmail.getText().toString().trim());
                                         progressBar.setVisibility(View.GONE);
                                     } else {
                                         Toast.makeText(MainActivity.this, "Failed to update email!", Toast.LENGTH_LONG).show();
@@ -223,6 +230,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 progressBar.setVisibility(View.VISIBLE);
                 if (user != null) {
+                    mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
+                            getUid()).removeValue();
                     user.delete()
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
@@ -234,6 +243,8 @@ public class MainActivity extends AppCompatActivity {
                                         progressBar.setVisibility(View.GONE);
                                     } else {
                                         Toast.makeText(MainActivity.this, "Failed to delete your account!", Toast.LENGTH_SHORT).show();
+                                        mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
+                                                getUid()).child("email").setValue(FirebaseAuth.getInstance().getCurrentUser());
                                         progressBar.setVisibility(View.GONE);
                                     }
                                 }
