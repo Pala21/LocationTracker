@@ -70,41 +70,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        final DatabaseReference m = mDatabase.child("locations").child(FirebaseAuth.getInstance()
-                .getCurrentUser().getUid());
-
-        final DatabaseReference user = mDatabase.child("users").child(FirebaseAuth.getInstance()
-                .getCurrentUser().getUid());
-
-
-            m.child("loc").addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.hasChildren()) {
-                            final Double lat = (Double)dataSnapshot.child("latitude").getValue();
-                            final Double lon = (Double)dataSnapshot.child("longitude").getValue();
-
-                            user.child("email").addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    mo = new MarkerOptions().position(new LatLng(lat,lon)).title("User "+ dataSnapshot.child("email").getValue());
-                                    marker =  mMap.addMarker(mo);
-                                }
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {}
-                            });
-                        }else{
-                            marker =  mMap.addMarker(mo);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
+        mDatabase.child("locations").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (final DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
+                       if(dataSnapshot1.hasChildren()) {
+                           final String key = dataSnapshot1.getKey();
+                           mDatabase.child("users").addValueEventListener(new ValueEventListener() {
+                               @Override
+                               public void onDataChange(DataSnapshot dataSnapshot) {
+                                   for(DataSnapshot dataSnapshot2 : dataSnapshot.getChildren())
+                                       if(key.equals(dataSnapshot2.getKey())) {
+                                           Double lat = (Double) dataSnapshot1.child("loc").child("latitude").getValue();
+                                           Double lon = (Double) dataSnapshot1.child("loc").child("longitude").getValue();
+                                           mo = new MarkerOptions().position(new LatLng(lat, lon)).title("User " + dataSnapshot2.child("email").child("email").getValue());
+                                           marker = mMap.addMarker(mo);
+                                       }
+                               }
+                               @Override
+                               public void onCancelled(DatabaseError databaseError) {}
+                           });
+                       }else{
+                           marker =  mMap.addMarker(mo);
+                       }
                 }
-        );
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
     }
 
     @Override
@@ -114,7 +107,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final LatLng myCoordinates = new LatLng(location.getLatitude(), location.getLongitude());
         DatabaseReference m = mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
                 getUid());
-        m.child("loc").addListenerForSingleValueEvent(
+        m.child("loc").addValueEventListener(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
