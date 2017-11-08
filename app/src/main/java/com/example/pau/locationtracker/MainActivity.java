@@ -232,6 +232,8 @@ public class MainActivity extends AppCompatActivity {
                 if (user != null) {
                     mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
                             getUid()).removeValue();
+                    mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
+                            getUid()).removeValue();
                     user.delete()
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
@@ -245,6 +247,8 @@ public class MainActivity extends AppCompatActivity {
                                         Toast.makeText(MainActivity.this, "Failed to delete your account!", Toast.LENGTH_SHORT).show();
                                         mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
                                                 getUid()).child("email").setValue(FirebaseAuth.getInstance().getCurrentUser());
+                                        mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
+                                                getUid()).child("locations").setValue(FirebaseAuth.getInstance().getCurrentUser());
                                         progressBar.setVisibility(View.GONE);
                                     }
                                 }

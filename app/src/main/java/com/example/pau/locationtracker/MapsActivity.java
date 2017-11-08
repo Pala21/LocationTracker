@@ -9,6 +9,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.nfc.Tag;
 import android.os.Build;
 import android.provider.ContactsContract;
 import android.provider.Settings;
@@ -33,11 +34,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
 
     final static int PERMISSION_ALL = 1;
     final static String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
     private GoogleMap mMap;
+    private HashMap<String, Marker> mMarkers = new HashMap<>();
     MarkerOptions mo;
     Marker marker;
     LocationManager locationManager;
@@ -67,46 +71,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
-
-        mDatabase.child("locations").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (final DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
-                       if(dataSnapshot1.hasChildren()) {
-                           final String key = dataSnapshot1.getKey();
-                           mDatabase.child("users").addValueEventListener(new ValueEventListener() {
-                               @Override
-                               public void onDataChange(DataSnapshot dataSnapshot) {
-                                   for(DataSnapshot dataSnapshot2 : dataSnapshot.getChildren())
-                                       if(key.equals(dataSnapshot2.getKey())) {
-                                           Double lat = (Double) dataSnapshot1.child("loc").child("latitude").getValue();
-                                           Double lon = (Double) dataSnapshot1.child("loc").child("longitude").getValue();
-                                           mo = new MarkerOptions().position(new LatLng(lat, lon)).title("User " + dataSnapshot2.child("email").child("email").getValue());
-                                           marker = mMap.addMarker(mo);
-                                       }
-                               }
-                               @Override
-                               public void onCancelled(DatabaseError databaseError) {}
-                           });
-                       }else{
-                           marker =  mMap.addMarker(mo);
-                       }
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        //Ja no peta si tirem enrere i tornem a entrar!
         final float zoomLevel = 17.0f;
         final LatLng myCoordinates = new LatLng(location.getLatitude(), location.getLongitude());
-        DatabaseReference m = mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
+        final DatabaseReference m = mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
                 getUid());
+
         m.child("loc").addValueEventListener(
                 new ValueEventListener() {
                     @Override
@@ -117,9 +92,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             LatLng latlon = new LatLng(lat, lon);
                             //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlon, zoomLevel), 6000, null);
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlon, zoomLevel));
+                            mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f), 2000, null);
                         }else{
                             //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel), 6000, null);
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel));
+                            mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f), 2000, null);
                         }
                     }
                     @Override
@@ -130,7 +107,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
                 getUid()).child("loc").setValue(myCoordinates);
+
+        mDatabase.child("locations").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (final DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
+                    if(dataSnapshot1.hasChildren()) {
+                        final String key = dataSnapshot1.getKey();
+                        mDatabase.child("users").addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for(DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
+                                    if (key.equals(dataSnapshot2.getKey())) {
+                                        Double lat = (Double) dataSnapshot1.child("loc").child("latitude").getValue();
+                                        Double lon = (Double) dataSnapshot1.child("loc").child("longitude").getValue();
+                                        LatLng coord = new LatLng(lat, lon);
+                                        mo = new MarkerOptions().position(coord).title("User " + dataSnapshot2.child("email").child("email").getValue());
+
+                                        if (!mMarkers.containsKey(key)) {
+                                            mMarkers.put(key, mMap.addMarker(mo));
+                                        } else {
+                                            mMarkers.get(key).setPosition(coord);
+                                        }
+                                    }
+                                }
+                            }
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {}
+                        });
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+
     }
+
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
@@ -165,7 +178,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        locationManager.requestLocationUpdates(provider, 3000, 4, this);
+        locationManager.requestLocationUpdates(provider, 100, 4, this);
 
 
     }
