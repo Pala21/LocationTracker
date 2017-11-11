@@ -46,11 +46,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private HashMap<String, Marker> mMarkers = new HashMap<>();
     private double lat;
     private double lon;
+    private boolean firstTime;
     MarkerOptions mo;
     LocationManager locationManager;
     private DatabaseReference mDatabase;
-    private boolean firstTime = false;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +59,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -78,11 +76,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
-        if(!firstTime){
-            Button button = (Button) findViewById(R.id.centrate);
-            button.setVisibility(View.INVISIBLE);
-        }
-
         mDatabase.child("locations").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -121,25 +114,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onLocationChanged(final Location location) {
         final LatLng myCoordinates = new LatLng(location.getLatitude(), location.getLongitude());
+        //searchLocation(location);
 
-        if(!firstTime) {
-            searchLocation(location);
-            Button button = (Button) findViewById(R.id.centrate);
-            button.setVisibility(View.VISIBLE);
-            firstTime = true;
-        }
+        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener(){
+            @Override
+            public void onCameraMove() {
+                Button button = (Button) findViewById(R.id.centrate);
+                button.setVisibility(View.VISIBLE);
+            }
+        });
+
 
         final Button button = findViewById(R.id.centrate);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 searchLocation(location);
+                button.setVisibility(View.INVISIBLE);
             }
         });
 
         mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
                 getUid()).child("loc").setValue(myCoordinates);
     }
+
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
