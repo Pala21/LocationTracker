@@ -19,6 +19,8 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -42,10 +44,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     final static String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
     private GoogleMap mMap;
     private HashMap<String, Marker> mMarkers = new HashMap<>();
+    private double lat;
+    private double lon;
     MarkerOptions mo;
-    Marker marker;
     LocationManager locationManager;
     private DatabaseReference mDatabase;
+    private boolean firstTime = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,40 +78,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        final float zoomLevel = 17.0f;
-        final LatLng myCoordinates = new LatLng(location.getLatitude(), location.getLongitude());
-        final DatabaseReference m = mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
-                getUid());
-
-        m.child("loc").addValueEventListener(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.hasChildren()) {
-                            Double lat = (Double)dataSnapshot.child("latitude").getValue();
-                            Double lon = (Double)dataSnapshot.child("longitude").getValue();
-                            LatLng latlon = new LatLng(lat, lon);
-                            //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlon, zoomLevel), 6000, null);
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlon, zoomLevel));
-                            mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f), 2000, null);
-                        }else{
-                            //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel), 6000, null);
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel));
-                            mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f), 2000, null);
-                        }
-                    }
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                    }
-                }
-        );
-
-        mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
-                getUid()).child("loc").setValue(myCoordinates);
+        if(!firstTime){
+            Button button = (Button) findViewById(R.id.centrate);
+            button.setVisibility(View.INVISIBLE);
+        }
 
         mDatabase.child("locations").addValueEventListener(new ValueEventListener() {
             @Override
@@ -141,9 +116,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         });
-
     }
 
+    @Override
+    public void onLocationChanged(final Location location) {
+        final LatLng myCoordinates = new LatLng(location.getLatitude(), location.getLongitude());
+
+        if(!firstTime) {
+            searchLocation(location);
+            Button button = (Button) findViewById(R.id.centrate);
+            button.setVisibility(View.VISIBLE);
+            firstTime = true;
+        }
+
+        final Button button = findViewById(R.id.centrate);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchLocation(location);
+            }
+        });
+
+        mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
+                getUid()).child("loc").setValue(myCoordinates);
+    }
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
@@ -235,6 +231,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 });
         dialog.show();
+    }
+
+    public void searchLocation(Location location){
+        final LatLng myCoordinates = new LatLng(location.getLatitude(), location.getLongitude());
+        final float zoomLevel = 17.0f;
+        final DatabaseReference m = mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
+                getUid());
+        m.child("loc").addValueEventListener(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.hasChildren()) {
+                            Double lat = (Double) dataSnapshot.child("latitude").getValue();
+                            Double lon = (Double) dataSnapshot.child("longitude").getValue();
+                            LatLng latlon = new LatLng(lat, lon);
+                            //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlon, zoomLevel), 6000, null);
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlon, zoomLevel));
+                            mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f), 2000, null);
+                        } else {
+                            //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel), 6000, null);
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel));
+                            mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f), 2000, null);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                }
+        );
+
     }
 
 }
