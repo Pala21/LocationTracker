@@ -19,6 +19,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
@@ -46,7 +47,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private HashMap<String, Marker> mMarkers = new HashMap<>();
     private double lat;
     private double lon;
-    private boolean firstTime;
+    private boolean isMaptouched;
     MarkerOptions mo;
     LocationManager locationManager;
     private DatabaseReference mDatabase;
@@ -63,7 +64,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         mo = new MarkerOptions().position(new LatLng(0, 0)).title("My current Location");
-
 
         if (Build.VERSION.SDK_INT >= 23 && !isPermissionGranted()) {
             requestPermissions(PERMISSIONS, PERMISSION_ALL);
@@ -114,16 +114,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onLocationChanged(final Location location) {
         final LatLng myCoordinates = new LatLng(location.getLatitude(), location.getLongitude());
-        //searchLocation(location);
 
-        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener(){
+        mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
             @Override
-            public void onCameraMove() {
-                Button button = (Button) findViewById(R.id.centrate);
-                button.setVisibility(View.VISIBLE);
+            public void onCameraMoveStarted(int reason) {
+                if (reason ==REASON_GESTURE) {
+                    isMaptouched = true;
+                }else if (reason ==REASON_API_ANIMATION) {
+                    isMaptouched = false;
+                } else if (reason ==REASON_DEVELOPER_ANIMATION) {
+                    isMaptouched = false;
+                }
             }
         });
 
+        if(isMaptouched){
+            Button button = (Button) findViewById(R.id.centrate);
+            button.setVisibility(View.VISIBLE);
+        }
 
         final Button button = findViewById(R.id.centrate);
         button.setOnClickListener(new View.OnClickListener() {
@@ -172,7 +180,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        locationManager.requestLocationUpdates(provider, 100, 4, this);
+        locationManager.requestLocationUpdates(provider, 0, 0, this);
 
 
     }
@@ -240,17 +248,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
+                        Button button = (Button) findViewById(R.id.centrate);
+
                         if (dataSnapshot.hasChildren()) {
                             Double lat = (Double) dataSnapshot.child("latitude").getValue();
                             Double lon = (Double) dataSnapshot.child("longitude").getValue();
                             LatLng latlon = new LatLng(lat, lon);
                             //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlon, zoomLevel), 6000, null);
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlon, zoomLevel));
-                            mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f), 2000, null);
+                            if(!button.isShown()) {
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlon, zoomLevel));
+                                mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f), 2000, null);
+                            }
                         } else {
                             //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel), 6000, null);
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel));
-                            mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f), 2000, null);
+                            if(!button.isShown()) {
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel));
+                                mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f), 2000, null);
+                            }
                         }
                     }
 
