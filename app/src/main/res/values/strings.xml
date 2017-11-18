@@ -29,9 +29,12 @@
     <string name="btn_sign_out">Sign Out</string>
     <string name="lbl_forgot_password">Forgot password?</string>
     <string name="forgot_password_msg">We just need your registered Email Id to sent you password reset instructions.</string>
-    <string name="btn_Map">View Map</string>
-    <string name="centrate">centrate</string>
+    <string name="centrate">CENTER</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="profile">PROFILE</string>
+    <string name="group">CREATE GROUP</string>
+    <string name="settings">SETTINGS</string>
+    <string name="viewMap">VIEW MAP</string>
 </resources>

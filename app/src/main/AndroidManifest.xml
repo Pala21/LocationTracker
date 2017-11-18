@@ -9,6 +9,7 @@
 <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 <uses-permission android:name="android.permission.READ_PROFILE" />
 <uses-permission android:name="android.permission.READ_CONTACTS" />
+<uses-permission android:name="android.permission.ACCESS_BACKGROUND_SERVICE"/>
 
 <application
     android:allowBackup="true"
@@ -18,26 +19,30 @@
     android:theme="@style/AppTheme">
     <activity
         android:name=".LoginActivity"
-        android:theme="@style/AppTheme.NoActionBar">
+        android:theme="@style/AppTheme.NoActionBar"
+        android:screenOrientation="portrait"
+        >
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
-
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
     </activity>
     <activity
         android:name=".MainActivity"
         android:label="@string/title_activity_profile"
-        android:theme="@style/AppTheme.NoActionBar" />
+        android:theme="@style/AppTheme.NoActionBar"
+        android:screenOrientation="portrait"/>
     <activity
         android:name=".SignupActivity"
         android:label="@string/title_activity_login"
-        android:theme="@style/AppTheme.NoActionBar" />
+        android:theme="@style/AppTheme.NoActionBar"
+        android:screenOrientation="portrait"/>
 
     <activity
         android:name=".ResetPasswordActivity"
         android:label="@string/title_activity_reset_password"
-        android:theme="@style/AppTheme.NoActionBar"/>
+        android:theme="@style/AppTheme.NoActionBar"
+        android:screenOrientation="portrait"/>
 
     <meta-data
         android:name="com.google.android.geo.API_KEY"
@@ -46,6 +51,11 @@
     <activity
         android:name=".MapsActivity"
         android:label="@string/title_activity_maps">
+    </activity>
+
+    <activity
+        android:name=".MenuActivity"
+        android:screenOrientation="portrait">
     </activity>
 
 </application>

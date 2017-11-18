@@ -108,15 +108,6 @@
             android:textColor="@android:color/white"
             android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/SeeMap"
-            style="?android:textAppearanceSmall"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/btn_Map"
-            android:textStyle="bold" />
-
 
         <ProgressBar
             android:id="@+id/progressBar"

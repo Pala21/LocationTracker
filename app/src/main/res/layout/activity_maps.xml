@@ -24,16 +24,16 @@
 
         <Button
         android:id="@+id/centrate"
-        android:layout_width="115dp"
+        android:layout_width="110dp"
         android:layout_height="wrap_content"
         android:text="@string/centrate"
         android:layout_gravity="bottom"
         android:background="@drawable/centrate_button"
-        android:textSize="12sp"
+        android:textSize="14sp"
         android:textColor="@drawable/button_text_color"
         android:drawableLeft="@drawable/icon_location2"
-        android:paddingLeft="5dp"/>
-
+        android:alpha="0.75"
+        android:paddingLeft="8dp"/>
     </LinearLayout>
 
 </RelativeLayout>

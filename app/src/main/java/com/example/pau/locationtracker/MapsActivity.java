@@ -1,17 +1,18 @@
 package com.example.pau.locationtracker;
 
 import android.Manifest;
+
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SyncStatusObserver;
+
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.nfc.Tag;
+
 import android.os.Build;
-import android.provider.ContactsContract;
+
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
@@ -19,9 +20,12 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.MotionEvent;
+
 import android.view.View;
+
 import android.widget.Button;
+
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -39,14 +43,12 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,GoogleMap.OnCameraMoveStartedListener {
 
     final static int PERMISSION_ALL = 1;
     final static String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
     private GoogleMap mMap;
     private HashMap<String, Marker> mMarkers = new HashMap<>();
-    private double lat;
-    private double lon;
     private boolean isMaptouched;
     MarkerOptions mo;
     LocationManager locationManager;
@@ -64,6 +66,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         mo = new MarkerOptions().position(new LatLng(0, 0)).title("My current Location");
+
+        Button button = (Button) findViewById(R.id.centrate);
+        button.setVisibility(View.INVISIBLE);
 
         if (Build.VERSION.SDK_INT >= 23 && !isPermissionGranted()) {
             requestPermissions(PERMISSIONS, PERMISSION_ALL);
@@ -109,29 +114,57 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         });
+
+        //per quan carregui de principi que es possi en l'última posició.
+        final DatabaseReference m = mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
+                getUid());
+        m.child("loc").addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Location loc = new Location("Location");
+                        if (dataSnapshot.hasChildren()) {
+                            Double lat = (Double) dataSnapshot.child("latitude").getValue();
+                            Double lon = (Double) dataSnapshot.child("longitude").getValue();
+                            loc.setLatitude(lat);
+                            loc.setLongitude(lon);
+                            searchLocation(loc);
+                        } else{
+                            Toast.makeText(MapsActivity.this, "LOADING CURRENT LOCATION...", Toast.LENGTH_LONG).show();
+                            searchLocation(loc);
+                        }
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                }
+        );
+
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
+        {
+            @Override
+            public boolean onMarkerClick(Marker m) {
+                boolean ap = false;
+                if(mMap.getCameraPosition().zoom < 17.0f) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 17.0f), 3000, null);
+                    ap = true;
+                }else if(mMap.getCameraPosition().zoom >= 17.0f){
+                    ap = false;
+                }
+                return ap;
+            }
+
+        });
     }
 
     @Override
     public void onLocationChanged(final Location location) {
         final LatLng myCoordinates = new LatLng(location.getLatitude(), location.getLongitude());
+        mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
+                getUid()).child("loc").setValue(myCoordinates);
 
-        mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
-            @Override
-            public void onCameraMoveStarted(int reason) {
-                if (reason ==REASON_GESTURE) {
-                    isMaptouched = true;
-                }else if (reason ==REASON_API_ANIMATION) {
-                    isMaptouched = false;
-                } else if (reason ==REASON_DEVELOPER_ANIMATION) {
-                    isMaptouched = false;
-                }
-            }
-        });
-
-        if(isMaptouched){
-            Button button = (Button) findViewById(R.id.centrate);
-            button.setVisibility(View.VISIBLE);
-        }
+        mMap.setOnCameraMoveStartedListener(this);
 
         final Button button = findViewById(R.id.centrate);
         button.setOnClickListener(new View.OnClickListener() {
@@ -141,11 +174,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 button.setVisibility(View.INVISIBLE);
             }
         });
-
-        mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
-                getUid()).child("loc").setValue(myCoordinates);
     }
-
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
@@ -181,8 +210,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         locationManager.requestLocationUpdates(provider, 0, 0, this);
-
-
     }
 
     private boolean isLocationEnabled() {
@@ -260,7 +287,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f), 2000, null);
                             }
                         } else {
-                            //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel), 6000, null);
                             if(!button.isShown()) {
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myCoordinates, zoomLevel));
                                 mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f), 2000, null);
@@ -276,4 +302,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    @Override
+    public void onCameraMoveStarted(int reason) {
+        if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
+            isMaptouched = true;
+        } else if (reason == GoogleMap.OnCameraMoveStartedListener
+                .REASON_API_ANIMATION) {
+            isMaptouched = false;
+        } else if (reason == GoogleMap.OnCameraMoveStartedListener
+                .REASON_DEVELOPER_ANIMATION) {
+            isMaptouched = false;
+        }
+        if(isMaptouched){
+            Button button = (Button) findViewById(R.id.centrate);
+            button.setVisibility(View.VISIBLE);
+        }
+    }
 }

@@ -22,7 +22,7 @@ import com.google.firebase.database.FirebaseDatabase;
 public class MainActivity extends AppCompatActivity {
 
     private Button btnChangeEmail, btnChangePassword, btnSendResetEmail, btnRemoveUser,
-            changeEmail, changePassword, sendEmail, remove, signOut, btnSeeMap;
+            changeEmail, changePassword, sendEmail, remove, signOut;
 
     private EditText oldEmail, newEmail, password, newPassword;
     private ProgressBar progressBar;
@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
         };
 
         btnChangeEmail = (Button) findViewById(R.id.change_email_button);
-        btnSeeMap = (Button) findViewById(R.id.SeeMap);
         btnChangePassword = (Button) findViewById(R.id.change_password_button);
         btnSendResetEmail = (Button) findViewById(R.id.sending_pass_reset_button);
         btnRemoveUser = (Button) findViewById(R.id.remove_user_button);
@@ -86,13 +85,6 @@ public class MainActivity extends AppCompatActivity {
         sendEmail.setVisibility(View.GONE);
         remove.setVisibility(View.GONE);
 
-        btnSeeMap.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-                MainActivity.this.startActivity(intent);
-            }
-        });
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
@@ -226,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
         btnRemoveUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -257,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
 
         signOut.setOnClickListener(new View.OnClickListener() {
             @Override
