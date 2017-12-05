@@ -10,7 +10,7 @@ import android.widget.ImageButton;
 
 public class MenuActivity extends FragmentActivity {
 
-    private ImageButton btnSeeMap, btnSettings;
+    private ImageButton btnSeeMap, btnSettings, btnFriends;
     private AlphaAnimation buttonClick = new AlphaAnimation(10F, 0.8F);
 
     @Override
@@ -30,12 +30,22 @@ public class MenuActivity extends FragmentActivity {
             }
         });
 
-        btnSettings = (ImageButton) findViewById(R.id.SettingsButton); btnSeeMap = (ImageButton) findViewById(R.id.LocationButton);
+        btnSettings = (ImageButton) findViewById(R.id.SettingsButton);
         btnSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 view.startAnimation(buttonClick);
                 Intent intent = new Intent(MenuActivity.this, MainActivity.class);
+                MenuActivity.this.startActivity(intent);
+            }
+        });
+
+        btnFriends = (ImageButton) findViewById(R.id.FriendsButton);
+        btnFriends.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                view.startAnimation(buttonClick);
+                Intent intent = new Intent(MenuActivity.this, FriendsActivity.class);
                 MenuActivity.this.startActivity(intent);
             }
         });

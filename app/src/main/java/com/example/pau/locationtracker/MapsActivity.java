@@ -140,7 +140,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
         );
 
-
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
         {
             @Override

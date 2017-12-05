@@ -14,18 +14,18 @@
     >
 
 
+    <!--android:adjustViewBounds="true"-->
     <ImageButton
         android:id="@+id/profileButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:src="@drawable/ic_shortcut_perm_identity"
-        android:visibility="visible"
         android:contentDescription="@string/profile"
         android:background="@null"
         android:paddingTop="25dp"
         android:adjustViewBounds="true"
-        />
+        android:src="@drawable/ic_shortcut_perm_identity"
+        android:visibility="visible" />
 
     <TextView
         android:id="@+id/profileText"
@@ -42,23 +42,23 @@
         android:textSize="16sp"/>
 
     <ImageButton
-        android:id="@+id/groupButton"
+        android:id="@+id/FriendsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:adjustViewBounds="true"
         android:src="@drawable/ic_shortcut_people_outline"
+        android:adjustViewBounds="true"
         android:visibility="visible"
         tools:ignore="ContentDescription,InefficientWeight"
         android:paddingTop="25dp"
         android:background="@null"
         />
     <TextView
-        android:id="@+id/groupText"
+        android:id="@+id/friends"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/group"
+        android:text="@string/friends"
         android:paddingBottom="25dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF"
@@ -80,6 +80,7 @@
         android:paddingTop="25dp"
         android:background="@null"
         />
+
     <TextView
         android:id="@+id/LocationText"
         android:layout_width="wrap_content"
@@ -98,15 +99,13 @@
         android:id="@+id/SettingsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:adjustViewBounds="false"
-        android:text="@string/group"
-        android:src="@drawable/ic_shortcut_settings"
-        android:visibility="visible"
-        tools:ignore="ContentDescription,InefficientWeight"
-        android:paddingTop="25dp"
         android:background="@null"
-        />
+        android:paddingTop="25dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/ic_shortcut_settings"
+        android:text="@string/group"
+        android:visibility="visible"
+        tools:ignore="ContentDescription,InefficientWeight" />
     <TextView
         android:id="@+id/SettingsText"
         android:layout_width="wrap_content"
