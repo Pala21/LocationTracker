@@ -85,10 +85,10 @@ public class FriendsActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(final String newText) {
-                if(!newText.equals("")){
-                    lv.setAdapter(adapterUsers);
-                    adapterUsers.getFilter().filter(newText);
-                }
+
+                lv.setAdapter(adapterUsers);
+                adapterUsers.getFilter().filter(newText);
+
                 return false;
             }
         });
