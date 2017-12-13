@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
 
@@ -19,9 +18,13 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 public class FriendsActivity extends AppCompatActivity {
-    ArrayAdapter<String> adapterFriends;
-    ArrayAdapter<String> adapterUsers;
+    //ArrayAdapter<String> adapterFriends;
+    //ArrayAdapter<String> adapterUsers;
+    MyCustomAdapter adapterFriends;
+    MyCustomAdapter adapterUsers;
     private DatabaseReference mDatabase;
+    final ArrayList<String> friends = new ArrayList<>();
+    final ArrayList<String> people = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,8 +33,6 @@ public class FriendsActivity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         ListView lv = (ListView) findViewById(R.id.listFriendsActivity);
-        final ArrayList<String> friends = new ArrayList<>();
-        final ArrayList<String> people = new ArrayList<>();
 
         mDatabase.child("friends").addValueEventListener(new ValueEventListener() {
             @Override
@@ -58,9 +59,12 @@ public class FriendsActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {}
         });
-        adapterUsers = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, people);
-        adapterFriends = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, friends);
+        //adapterUsers = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, people);
+        //adapterFriends = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, friends);
+        adapterUsers = new MyCustomAdapter(people, this);
+        adapterFriends = new MyCustomAdapter(friends, this);
 
+        //lv.setAdapter(adapterFriends);
         lv.setAdapter(adapterFriends);
         String TAG = FriendsActivity.class.getSimpleName();
         Log.d(TAG, "Entraaaaa");
@@ -85,10 +89,9 @@ public class FriendsActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(final String newText) {
-
                 lv.setAdapter(adapterUsers);
+                //adapterUsers.getFilter().filter(newText);
                 adapterUsers.getFilter().filter(newText);
-
                 return false;
             }
         });
@@ -96,6 +99,7 @@ public class FriendsActivity extends AppCompatActivity {
         searchView.setOnCloseListener(new SearchView.OnCloseListener(){
             @Override
             public boolean onClose() {
+                //lv.setAdapter(adapterFriends);
                 lv.setAdapter(adapterFriends);
                 return false;
             }
