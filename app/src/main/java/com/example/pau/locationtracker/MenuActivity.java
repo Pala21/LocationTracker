@@ -17,7 +17,6 @@ public class MenuActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
-
         //findViewById(R.id.menu).getBackground().setAlpha(190);
 
         btnSeeMap = (ImageButton) findViewById(R.id.LocationButton);
@@ -41,15 +40,20 @@ public class MenuActivity extends FragmentActivity {
         });
 
         btnFriends = (ImageButton) findViewById(R.id.FriendsButton);
+
+
         btnFriends.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 view.startAnimation(buttonClick);
-                Intent intent = new Intent(MenuActivity.this, FriendsActivity.class);
+                //Intent intent = new Intent(MenuActivity.this, FriendsActivity.class);
+                Intent intent = new Intent(MenuActivity.this, MainActivityFriends.class);
                 MenuActivity.this.startActivity(intent);
             }
         });
     }
+
+
 }
 
 

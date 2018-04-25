@@ -17,11 +17,12 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 
 public class SignupActivity extends AppCompatActivity {
 
-    private EditText inputEmail, inputPassword;
+    private EditText inputEmail, inputFullName, inputUsername, inputPassword;
     private Button btnSignIn, btnSignUp, btnResetPassword;
     private ProgressBar progressBar;
     private FirebaseAuth auth;
@@ -40,6 +41,8 @@ public class SignupActivity extends AppCompatActivity {
         btnSignIn = (Button) findViewById(R.id.sign_in_button);
         btnSignUp = (Button) findViewById(R.id.sign_up_button);
         inputEmail = (EditText) findViewById(R.id.email);
+        inputFullName = (EditText) findViewById(R.id.name);
+        inputUsername = (EditText) findViewById(R.id.username);
         inputPassword = (EditText) findViewById(R.id.password);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         btnResetPassword = (Button) findViewById(R.id.btn_reset_password);
@@ -64,20 +67,31 @@ public class SignupActivity extends AppCompatActivity {
 
                 String email = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
-
+                final String name = inputFullName.getText().toString();
+                final String username = inputUsername.getText().toString();
 
                 if (TextUtils.isEmpty(email)) {
-                    Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Enter email address...", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (TextUtils.isEmpty(name)) {
+                    Toast.makeText(getApplicationContext(), "Enter Full Name...", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (TextUtils.isEmpty(username)) {
+                    Toast.makeText(getApplicationContext(), "Enter your Username...", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 if (TextUtils.isEmpty(password)) {
-                    Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Enter password...", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 if (password.length() < 6) {
-                    Toast.makeText(getApplicationContext(), "Password too short, enter minimum 6 characters!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Password too short, enter minimum 6 characters.", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -89,16 +103,23 @@ public class SignupActivity extends AppCompatActivity {
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 Toast.makeText(SignupActivity.this, "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
                                 progressBar.setVisibility(View.GONE);
-                                // If sign in fails, display a message to the user. If sign in succeeds
-                                // the auth state listener will be notified and logic to handle the
-                                // signed in user can be handled in the listener.
+
                                 if (!task.isSuccessful()) {
                                     Toast.makeText(SignupActivity.this, "Authentication failed." + task.getException(),
                                             Toast.LENGTH_SHORT).show();
                                 } else {
-                                    startActivity(new Intent(SignupActivity.this, MainActivity.class));
+                                    String DeviceToken = FirebaseInstanceId.getInstance().getToken();
+
                                     mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
                                             getUid()).child("email").setValue(FirebaseAuth.getInstance().getCurrentUser());
+                                    mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
+                                            getUid()).child("fullName").setValue(name);
+                                    mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
+                                            getUid()).child("username").setValue(username);
+                                    mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
+                                            getUid()).child("DeviceToken").setValue(DeviceToken);
+
+                                    startActivity(new Intent(SignupActivity.this, MenuActivity.class));
                                     finish();
                                 }
                             }

@@ -12,9 +12,13 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -22,13 +26,14 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private ProgressBar progressBar;
     private Button btnSignup, btnLogin, btnReset;
-
+    private DatabaseReference mDatabase;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         //Get Firebase auth instance
         auth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
 
         if (auth.getCurrentUser() != null) {
             startActivity(new Intent(LoginActivity.this, MenuActivity.class));
@@ -100,9 +105,17 @@ public class LoginActivity extends AppCompatActivity {
                                         Toast.makeText(LoginActivity.this, getString(R.string.auth_failed), Toast.LENGTH_LONG).show();
                                     }
                                 } else {
-                                    Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
-                                    startActivity(intent);
-                                    finish();
+                                    String DeviceToken = FirebaseInstanceId.getInstance().getToken();
+
+                                    mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
+                                            getUid()).child("DeviceToken").setValue(DeviceToken).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
+                                            startActivity(intent);
+                                            finish();
+                                        }
+                                    });
                                 }
                             }
                         });

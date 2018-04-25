@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.Filter;
@@ -12,17 +13,31 @@ import android.widget.Filterable;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class MyCustomAdapter  extends BaseAdapter implements ListAdapter, Filterable {
-    private ArrayList<String> list = new ArrayList<String>();
+    private ArrayList<String> list;
     List<String> mOriginalValues;
     private Context context;
+    private AlphaAnimation buttonClick = new AlphaAnimation(10F, 0.8F);
+    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+    ArrayList<Friend> myFriends;
+    boolean noentris = false;
 
-    public MyCustomAdapter(ArrayList<String> list, Context context) {
+
+    public MyCustomAdapter(ArrayList<String> list, Context context, ArrayList<Friend> friends) {
         this.list = list;
         this.context = context;
+        this.myFriends = friends;
     }
 
     @Override
@@ -45,23 +60,71 @@ public class MyCustomAdapter  extends BaseAdapter implements ListAdapter, Filter
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         View view = convertView;
+
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.custom_layout, null);
         }
 
         //Handle TextView and display string from your list
-        TextView contactfriend= (TextView)view.findViewById(R.id.contactFriend);
+        TextView contactfriend = view.findViewById(R.id.contactFriend);
         contactfriend.setText(list.get(position));
 
         //Handle buttons and add onClickListeners
-        Button callbtn= (Button)view.findViewById(R.id.btn);
+        final Button callbtn = view.findViewById(R.id.btn);
 
         callbtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                //do something
+                noentris = false;
+                v.startAnimation(buttonClick);
 
+                final String TAG = FriendsActivity.class.getSimpleName();
+                mDatabase.child("Friendships").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).orderByChild("friendName").
+                        equalTo(list.get(position)).addValueEventListener(new ValueEventListener() {
+
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if(!(dataSnapshot!=null && dataSnapshot.getChildren()!=null &&
+                                dataSnapshot.getChildren().iterator().hasNext())) {
+                            if(!noentris ){
+                                Friend f = new Friend(list.get(position), false);
+                                Log.d(TAG, "ENTRA FILTER  1 "+dataSnapshot.getKey() + "value "+dataSnapshot.getValue());
+                                myFriends.add(f);
+                                mDatabase.child("Friendships").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(myFriends);
+                                Log.d(TAG, "ENTRA FILTER 1 "+myFriends);
+                                System.out.println(myFriends);
+                                noentris = true;
+                                callbtn.setText("Pending");
+                              
+                            }
+                        }else{
+                            if(!noentris){
+                                for(DataSnapshot a : dataSnapshot.getChildren()){
+                                    String name = (String) a.child("friendName").getValue();
+                                    if(name.equals(list.get(position))){
+                                        String key = a.getKey();
+                                        Log.d(TAG, "ENTRA FILTER 2 POSITIOOOON!"+position);
+                                        mDatabase.child("Friendships").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(key).removeValue();
+                                        for(Iterator<Friend> f = myFriends.iterator(); f.hasNext();){
+                                            Friend friend = f.next();
+                                            if(friend.friendName.equals(list.get(position))){
+                                                System.out.println("entraaaaaaaaaaaaaaa delete");
+                                                f.remove();
+                                                callbtn.setText("Follow");
+                                            }
+                                        }
+                                        noentris = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+}
+                });
             }
         });
         return view;

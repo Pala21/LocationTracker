@@ -100,6 +100,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         if (!mMarkers.containsKey(key)) {
                                             mMarkers.put(key, mMap.addMarker(mo));
                                         } else {
+                                            System.out.println(key);
                                             mMarkers.get(key).setPosition(coord);
                                         }
                                     }
@@ -130,6 +131,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             loc.setLongitude(lon);
                             searchLocation(loc);
                         } else{
+                            //PUT SPINNER!!
                             Toast.makeText(MapsActivity.this, "LOADING CURRENT LOCATION...", Toast.LENGTH_LONG).show();
                             searchLocation(loc);
                         }
@@ -318,3 +320,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 }
+
+

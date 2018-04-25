@@ -23,4 +23,7 @@
         android:textSize="10sp"
         android:textColor="@color/white"
         />
+
+    <!--android:text="Unfollow"-->
+
 </RelativeLayout>
