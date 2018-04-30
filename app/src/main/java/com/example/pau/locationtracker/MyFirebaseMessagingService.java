@@ -1,4 +1,4 @@
-package com.example.pau.locationtracker;
+/*package com.example.pau.locationtracker;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -25,7 +25,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      * @param remoteMessage Object representing the message received from Firebase Cloud Messaging.
      */
     // [START receive_message]
-    @Override
+   /* @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // [START_EXCLUDE]
         // There are two types of messages data messages and notification messages. Data messages are handled
@@ -64,12 +64,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      *
      * @param message GCM message received.
      */
-    private void sendNotification(String title, String message) {
+  /*  private void sendNotification(String title, String message) {
 
         Intent intent = new Intent(this, FriendsActivity.class);
 
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code *//*, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -93,4 +93,4 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Random rnd = new Random();
         return 100 + rnd.nextInt(900000);
     }
-}
+}*/

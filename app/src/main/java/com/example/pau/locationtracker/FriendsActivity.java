@@ -1,23 +1,6 @@
 package com.example.pau.locationtracker;
 
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
-import android.widget.SearchView;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-
+/*
 public class FriendsActivity extends AppCompatActivity {
 
     MyCustomAdapter adapterFriends;
@@ -25,7 +8,7 @@ public class FriendsActivity extends AppCompatActivity {
     private DatabaseReference mDatabase;
     ArrayList<String> friends = new ArrayList<>();
     final ArrayList<String> people = new ArrayList<>();
-    ArrayList<Friend> aFriends = new ArrayList<>();
+    ArrayList<Friends> aFriends = new ArrayList<>();
     ListView lv;
     boolean trobat = false;
 
@@ -100,14 +83,14 @@ public class FriendsActivity extends AppCompatActivity {
                         }
                     }
                     for (Integer i = 0; i < friends.size(); i++) {
-                        for(Friend a : aFriends){
+                        for(Friends a : aFriends){
                             if(a.friendName.equals(friends.get(i))){
                                 trobat = true;
 
                             }
                         }
                         if(!trobat)
-                            aFriends.add(new Friend(friends.get(i), false));
+                            aFriends.add(new Friends(friends.get(i), false));
                     }
                     System.out.println("A VEURE ELS AFRIENDS :: "+aFriends);
                     ((BaseAdapter) lv.getAdapter()).notifyDataSetChanged();
@@ -131,4 +114,4 @@ public class FriendsActivity extends AppCompatActivity {
 
 
     }
-}
+}*/

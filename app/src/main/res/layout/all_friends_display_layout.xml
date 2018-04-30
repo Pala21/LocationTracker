@@ -15,7 +15,6 @@
         <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/all_users_profile_image"
             android:layout_marginLeft="10dp"
-
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:src="@drawable/ic_shortcut_perm_identity"
@@ -50,8 +49,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
-            >
+            android:paddingTop="10dp">
 
             <Button
                 android:id="@+id/btn"
@@ -59,13 +57,11 @@
                 android:layout_height="30dp"
                 android:layout_gravity="right"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/add_friend_button"
-                android:text="Follow"
-                android:textColor="@color/white"
+                android:background="@drawable/unfollow_friend_button"
+                android:text="Unfollow"
+                android:textColor="@color/colorPrimaryDark"
                 android:textSize="10sp" />
-
         </LinearLayout>
-
 
     </LinearLayout>
 

@@ -1,4 +1,4 @@
-package com.example.pau.locationtracker;
+/*package com.example.pau.locationtracker;
 
 import android.content.Context;
 import android.util.Log;
@@ -30,11 +30,11 @@ public class MyCustomAdapter  extends BaseAdapter implements ListAdapter, Filter
     private Context context;
     private AlphaAnimation buttonClick = new AlphaAnimation(10F, 0.8F);
     private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
-    ArrayList<Friend> myFriends;
+    ArrayList<Friends> myFriends;
     boolean noentris = false;
 
 
-    public MyCustomAdapter(ArrayList<String> list, Context context, ArrayList<Friend> friends) {
+    public MyCustomAdapter(ArrayList<String> list, Context context, ArrayList<Friends> friends) {
         this.list = list;
         this.context = context;
         this.myFriends = friends;
@@ -88,7 +88,7 @@ public class MyCustomAdapter  extends BaseAdapter implements ListAdapter, Filter
                         if(!(dataSnapshot!=null && dataSnapshot.getChildren()!=null &&
                                 dataSnapshot.getChildren().iterator().hasNext())) {
                             if(!noentris ){
-                                Friend f = new Friend(list.get(position), false);
+                                Friends f = new Friends(list.get(position), false);
                                 Log.d(TAG, "ENTRA FILTER  1 "+dataSnapshot.getKey() + "value "+dataSnapshot.getValue());
                                 myFriends.add(f);
                                 mDatabase.child("Friendships").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(myFriends);
@@ -106,8 +106,8 @@ public class MyCustomAdapter  extends BaseAdapter implements ListAdapter, Filter
                                         String key = a.getKey();
                                         Log.d(TAG, "ENTRA FILTER 2 POSITIOOOON!"+position);
                                         mDatabase.child("Friendships").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child(key).removeValue();
-                                        for(Iterator<Friend> f = myFriends.iterator(); f.hasNext();){
-                                            Friend friend = f.next();
+                                        for(Iterator<Friends> f = myFriends.iterator(); f.hasNext();){
+                                            Friends friend = f.next();
                                             if(friend.friendName.equals(list.get(position))){
                                                 System.out.println("entraaaaaaaaaaaaaaa delete");
                                                 f.remove();
@@ -159,7 +159,7 @@ public class MyCustomAdapter  extends BaseAdapter implements ListAdapter, Filter
                  *  else does the Filtering and returns FilteredArrList(Filtered)
                  *
                  ********/
-                if (constraint == null || constraint.length() == 0) {
+          /*      if (constraint == null || constraint.length() == 0) {
 
                     // set the Original result to return
                     results.count = mOriginalValues.size();
@@ -181,4 +181,4 @@ public class MyCustomAdapter  extends BaseAdapter implements ListAdapter, Filter
         };
         return filter;
     }
-}
+}*/
