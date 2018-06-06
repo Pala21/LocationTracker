@@ -4,11 +4,13 @@ public class Friends {
     public String username;
     public String image;
     public String fullname;
+    public String key;
 
-    public Friends(String username, String fullname, String image) {
+    public Friends(String username, String fullname, String image, String key) {
         this.username = username;
         this.fullname = fullname;
         this.image = image;
+        this.key = key;
     }
 
     public Friends(){}
@@ -41,6 +43,12 @@ public class Friends {
     {
 
         return image;
+    }
+
+    public String getKey()
+    {
+
+        return key;
     }
 
     public void setUserImage(String image)

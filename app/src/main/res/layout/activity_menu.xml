@@ -5,16 +5,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:weightSum="1"
-    android:paddingTop="10dp"
     android:paddingBottom="10dp"
     android:background="@drawable/background2"
-    android:layout_gravity="center"
     android:gravity="center"
     android:id="@+id/menu"
     >
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginRight="15dp"
+        >
+            <ImageButton
+            android:id="@+id/SettingsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:src="@drawable/ic_shortcut_settings"
+            android:visibility="visible"
+            tools:ignore="ContentDescription,InefficientWeight" />
+    </LinearLayout>
 
-    <!--android:adjustViewBounds="true"-->
     <ImageButton
         android:id="@+id/profileButton"
         android:layout_width="wrap_content"
@@ -68,6 +80,32 @@
         android:textSize="16sp"/>
 
     <ImageButton
+        android:id="@+id/groupsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:paddingTop="25dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/ic_shortcut_group_add"
+        android:text="@string/group"
+        android:visibility="visible"
+        tools:ignore="ContentDescription,InefficientWeight" />
+    <TextView
+        android:id="@+id/groupsButtonText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/groupsButtonText"
+        android:paddingBottom="25dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#FFFFFF"
+        android:shadowColor="#000000"
+        android:shadowRadius="10"
+        android:textStyle="bold"
+        android:textSize="16sp"/>
+
+
+    <ImageButton
         android:id="@+id/LocationButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -95,29 +133,5 @@
         android:textStyle="bold"
         android:textSize="16sp"/>
 
-    <ImageButton
-        android:id="@+id/SettingsButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@null"
-        android:paddingTop="25dp"
-        android:adjustViewBounds="true"
-        android:src="@drawable/ic_shortcut_settings"
-        android:text="@string/group"
-        android:visibility="visible"
-        tools:ignore="ContentDescription,InefficientWeight" />
-    <TextView
-        android:id="@+id/SettingsText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/settings"
-        android:paddingBottom="25dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#FFFFFF"
-        android:shadowColor="#000000"
-        android:shadowRadius="10"
-        android:textStyle="bold"
-        android:textSize="16sp"/>
 
 </LinearLayout>

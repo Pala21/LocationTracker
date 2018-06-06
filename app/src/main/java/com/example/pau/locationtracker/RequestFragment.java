@@ -138,7 +138,7 @@ public class RequestFragment extends Fragment {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     System.out.println("KEY ::" + dataSnapshot.getValue());
                     for (DataSnapshot internFields : dataSnapshot.getChildren()) {
-                        if (internFields.getKey().equals("fullName")) {
+                        if (internFields.getKey().equals("fullname")) {
                             fullname.setText(internFields.getValue().toString());
                         }
                         if (internFields.getKey().equals("username")) {
@@ -169,7 +169,7 @@ public class RequestFragment extends Fragment {
                     String usernameReceiver = null;
                     String imageReceiver = null;
                     for (DataSnapshot internFields : dataSnapshot.getChildren()) {
-                        if (internFields.getKey().equals("fullName")) {
+                        if (internFields.getKey().equals("fullname")) {
                             fullnameReceiver = internFields.getValue().toString();
                         }
                         if (internFields.getKey().equals("username")) {
@@ -183,6 +183,7 @@ public class RequestFragment extends Fragment {
                     FriendsReferenceSender.child(receiver_user_id).child("fullname").setValue(fullnameReceiver);
                     FriendsReferenceSender.child(receiver_user_id).child("username").setValue(usernameReceiver);
                     FriendsReferenceSender.child(receiver_user_id).child("image").setValue(imageReceiver);
+                    FriendsReferenceSender.child(receiver_user_id).child("key").setValue(receiver_user_id);
                     FriendRequestReference.child(receiver_user_id).removeValue();
                 }
 
@@ -202,7 +203,7 @@ public class RequestFragment extends Fragment {
                     String usernameSender = null;
                     String imageSender = null;
                     for (DataSnapshot internFields : dataSnapshot.getChildren()) {
-                        if (internFields.getKey().equals("fullName")) {
+                        if (internFields.getKey().equals("fullname")) {
                             fullnameSender = internFields.getValue().toString();
                         }
                         if (internFields.getKey().equals("username")) {

@@ -74,38 +74,4 @@ public class MainActivityFriends extends AppCompatActivity{
 
     }
 
-
-   /* @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-
-        System.out.println("ON_MENUUUUUU "+ menu);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options_menu, menu);
-        final MenuItem item = menu.findItem(R.id.menuSearch);
-        final SearchView searchView = (SearchView) item.getActionView();
-
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(final String newText) {
-                return false;
-            }
-        });
-
-        searchView.setOnCloseListener(new SearchView.OnCloseListener(){
-            @Override
-            public boolean onClose() {
-                return false;
-            }
-        });
-
-        return true;
-    }*/
-
-
 }

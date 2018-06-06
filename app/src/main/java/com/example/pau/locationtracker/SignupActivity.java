@@ -113,7 +113,11 @@ public class SignupActivity extends AppCompatActivity {
                                     mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
                                             getUid()).child("email").setValue(FirebaseAuth.getInstance().getCurrentUser());
                                     mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
-                                            getUid()).child("fullName").setValue(name);
+                                            getUid()).child("key").setValue(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                    mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
+                                            getUid()).child("noprofileimage").setValue("https://firebasestorage.googleapis.com/v0/b/ubication-project-29de0.appspot.com/o/ic_shortcut_perm_identity.png?alt=media&token=28a1dbc9-a229-470d-8c6a-e1c0442a77d1");
+                                    mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
+                                            getUid()).child("fullname").setValue(name);
                                     mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
                                             getUid()).child("username").setValue(username);
                                     mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().

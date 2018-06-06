@@ -1,58 +1,77 @@
 package com.example.pau.locationtracker;
 
 import android.Manifest;
-
 import android.content.DialogInterface;
 import android.content.Intent;
-
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-
+import android.net.Uri;
 import android.os.Build;
-
+import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-
 import android.view.View;
-
 import android.widget.Button;
-
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,GoogleMap.OnCameraMoveStartedListener {
+public class MapsActivity extends FragmentActivity  implements OnMapReadyCallback, LocationListener,GoogleMap.OnCameraMoveStartedListener {
 
     final static int PERMISSION_ALL = 1;
     final static String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
     private GoogleMap mMap;
     private HashMap<String, Marker> mMarkers = new HashMap<>();
     private boolean isMaptouched;
+    DatabaseReference groupMembersReference;
     MarkerOptions mo;
     LocationManager locationManager;
     private DatabaseReference mDatabase;
+    ArrayList<String> mUsers;
+    private FirebaseAuth mAuth;
+    String id;
+    StorageReference storageRef;
+    String key;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +85,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         mo = new MarkerOptions().position(new LatLng(0, 0)).title("My current Location");
-
+        mAuth = FirebaseAuth.getInstance();
+        id = mAuth.getUid();
         Button button = (Button) findViewById(R.id.centrate);
         button.setVisibility(View.INVISIBLE);
 
@@ -76,12 +96,158 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (!isLocationEnabled())
             showAlert(1);
+
+        groupMembersReference = FirebaseDatabase.getInstance().getReference().child("groups");
+        groupMembersReference.keepSynced(true);
+        key = (String) getIntent().getExtras().get("GROUPKEY");
+        mUsers = new ArrayList<>();
+
+        storageRef = FirebaseStorage.getInstance().getReference().child("Profile_Images");
+
     }
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
+
+        groupMembersReference.child(key).child("usersId").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot d2 : dataSnapshot.getChildren()){
+                    for(DataSnapshot d3 : d2.getChildren()){
+                        System.out.println("D3 :: "+d3.getKey() + " "+d3.getValue());
+                        if(d3.getKey().equals("visibility")){
+                            if(d3.getValue().equals(true)){
+                                mUsers.add((String) d2.getKey());
+                            }
+                        }
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         mDatabase.child("locations").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (final DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+                    if (dataSnapshot1.hasChildren()) {
+                        final String key = dataSnapshot1.getKey();
+                        System.out.println("KEYs:: "+dataSnapshot1.getKey());
+                        System.out.println("mUSERSS AND KEY:: "+mUsers + " "+key);
+                        if(mUsers.contains(key)){
+                            mDatabase.child("users").addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    for(final DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
+                                        if (key.equals(dataSnapshot2.getKey())) {
+                                            Double lat = (Double) dataSnapshot1.child("loc").child("latitude").getValue();
+                                            Double lon = (Double) dataSnapshot1.child("loc").child("longitude").getValue();
+                                            final LatLng coord = new LatLng(lat, lon);
+
+
+                                            StorageReference filePath = storageRef.child(key+".jpg");
+                                            System.out.println("FILEPATH ::"+filePath.getName());
+
+                                            //user sense foto de perfil
+                                            filePath.getDownloadUrl().addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    Bitmap icon = BitmapFactory.decodeResource(getApplicationContext().getResources(),
+                                                            R.drawable.ic_shortcut_perm_identity);
+
+                                                    Bitmap resizedBitmap = Bitmap.createScaledBitmap(icon, 130, 130, false);
+
+                                                    mo = new MarkerOptions().position(coord).title((String) dataSnapshot2.child("username")
+                                                            .getValue()).snippet((String) dataSnapshot2.child("fullname").
+                                                            getValue()).icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap));
+
+                                                    if (!mMarkers.containsKey(key)) {
+                                                        mMarkers.put(key, mMap.addMarker(mo));
+                                                    } else {
+                                                        System.out.println(key);
+                                                        mMarkers.get(key).setPosition(coord);
+                                                    }
+                                                }
+                                            });
+
+                                            //user amb foto de perfil
+                                            filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                @Override
+                                                public void onSuccess(Uri uri) {
+                                                    ColorDrawable cd = new ColorDrawable(ContextCompat.getColor(MapsActivity.this, R.color.colorPrimaryDark));
+                                                    Glide.with(getApplicationContext())
+                                                            .load(uri.toString())
+                                                            .asBitmap()
+                                                            .listener(new RequestListener<String, Bitmap>() {
+                                                                @Override
+                                                                public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
+                                                                    System.out.println("Entra error");
+                                                                    return false;
+                                                                }
+
+                                                                @Override
+                                                                public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                                                    System.out.println("Entra ok");
+                                                                    Bitmap resizedBitmap = Bitmap.createScaledBitmap(resource, 110, 110, false);
+                                                                    Bitmap circle = getCroppedBitmap(resizedBitmap);
+                                                                    mo = (new MarkerOptions()
+                                                                            .position(coord)
+                                                                            .title((String) dataSnapshot2.child("username").getValue())
+                                                                            .snippet((String) dataSnapshot2.child("fullname").getValue())
+                                                                            .icon(BitmapDescriptorFactory.fromBitmap(circle))
+                                                                    );
+
+
+                                                                    if (!mMarkers.containsKey(key)) {
+                                                                        mMarkers.put(key, mMap.addMarker(mo));
+                                                                    } else {
+                                                                        System.out.println(key);
+                                                                        mMarkers.get(key).setPosition(coord);
+                                                                    }
+                                                                    return true;
+                                                                }
+                                                            })
+                                                            .placeholder(cd)
+                                                            .centerCrop()
+                                                            .preload();
+                                                }
+                                            });
+
+                                           /* mo = new MarkerOptions().position(coord).title((String) dataSnapshot2.child("username")
+                                                .getValue()).snippet((String) dataSnapshot2.child("fullname").getValue());
+                                            if (!mMarkers.containsKey(key)) {
+                                                mMarkers.put(key, mMap.addMarker(mo));
+                                            } else {
+                                                System.out.println(key);
+                                                mMarkers.get(key).setPosition(coord);
+                                            }*/
+                                        }
+                                    }
+                                }
+
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {}
+                            });
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        });
+
+
+
+        /*mDatabase.child("locations").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (final DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
@@ -114,11 +280,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {}
-        });
+        });*/
 
         //per quan carregui de principi que es possi en l'última posició.
-        final DatabaseReference m = mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
-                getUid());
+        final DatabaseReference m = mDatabase.child("locations").child(id);
         m.child("loc").addListenerForSingleValueEvent(
                 new ValueEventListener() {
                     @Override
@@ -159,11 +324,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    public Bitmap getCroppedBitmap(Bitmap bitmap) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        // canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+                bitmap.getWidth() / 2, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        //Bitmap _bmp = Bitmap.createScaledBitmap(output, 60, 60, false);
+        //return _bmp;
+        return output;
+    }
+
+
     @Override
     public void onLocationChanged(final Location location) {
         final LatLng myCoordinates = new LatLng(location.getLatitude(), location.getLongitude());
-        mDatabase.child("locations").child(FirebaseAuth.getInstance().getCurrentUser().
-                getUid()).child("loc").setValue(myCoordinates);
+        mDatabase.child("locations").child(id).child("loc").setValue(myCoordinates);
 
         mMap.setOnCameraMoveStartedListener(this);
 
@@ -294,7 +481,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             }
                         }
                     }
-
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                     }
@@ -320,5 +506,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 }
+
+
 
 

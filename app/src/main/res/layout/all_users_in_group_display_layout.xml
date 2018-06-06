@@ -4,8 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+
     <LinearLayout
-        android:id="@+id/linearDisplayUsers"
+        android:id ="@+id/linearDisplayUsers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
@@ -23,7 +24,7 @@
             app:civ_border_width="1dp" />
 
         <LinearLayout
-            android:layout_width="155dp"
+            android:layout_width="170dp"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
             android:orientation="vertical"
@@ -49,34 +50,16 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp">
-
-            <Button
-                android:id="@+id/AcceptBtn"
-                android:layout_width="55dp"
-                android:layout_height="25dp"
-                android:layout_gravity="right"
-                android:layout_marginRight="7dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/accept_button"
-                android:text="Accept"
-                android:textColor="@color/white"
-                android:textSize="10sp" />
-
-            <Button
-                android:id="@+id/DenyBtn"
-                android:layout_width="55dp"
-                android:layout_height="25dp"
-                android:layout_gravity="right"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/deny_button"
-                android:text="Deny"
-                android:textColor="@color/white"
-                android:textSize="10sp" />
-
+            android:paddingTop="10dp" >
+            <CheckBox
+                android:id="@+id/checkBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:shadowColor="@color/colorPrimaryDark"
+                android:layout_marginLeft="25dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_weight="0.04" />
         </LinearLayout>
-
-
     </LinearLayout>
 
 </LinearLayout>

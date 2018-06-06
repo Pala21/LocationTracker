@@ -41,11 +41,15 @@
     <string name="searchFriend">Search...</string>
     <string name="name">First name</string>
     <string name="surname">Last name</string>
-    <string name="username">Username</string>
-    <string name="fullname">Full Name</string>
+    <string name="username" />
+    <string name="fullname" />
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_main_friends">MainActivityFriends</string>
+    <string name="title_activity_groups">GroupsActivity</string>
+    <string name="groupName" />
+    <string name="groupsButtonText">GROUPS</string>
 
 </resources>

@@ -8,11 +8,13 @@ public class Users {
     public String username;
     public String image;
     public String fullname;
+    public String key;
 
-    public Users(String username, String fullname, String image) {
+    public Users(String username, String fullname, String image, String key) {
         this.username = username;
         this.fullname = fullname;
         this.image = image;
+        this.key = key;
     }
 
     public Users(){}
@@ -22,6 +24,7 @@ public class Users {
     {
         return fullname;
     }
+
     public void setFullname(String fullname)
     {
 
@@ -50,5 +53,9 @@ public class Users {
 
     {
         this.image = image;
+    }
+
+    public String getKey() {
+        return key;
     }
 }

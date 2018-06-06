@@ -7,6 +7,7 @@ android {
         applicationId "com.example.pau.locationtracker"
         minSdkVersion 15
         targetSdkVersion 26
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -21,11 +22,14 @@ android {
         }
     }
 
+
+
     allprojects {
         repositories {
             maven { url "https://maven.google.com" }
         }
     }
+
 }
 
 dependencies {
@@ -34,7 +38,9 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     //hauria de ser firebase version : 11.8.0
+    compile group: 'com.squareup.picasso', name: 'picasso', version: '2.5.0'
     compile 'com.android.support:appcompat-v7:26.0.0-alpha1'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.google.android.gms:play-services-base:11.8.0'
     compile 'com.google.android.gms:play-services-maps:11.8.0'
     compile 'com.android.support:design:26.0.0-alpha1'
@@ -45,8 +51,13 @@ dependencies {
     compile 'com.google.firebase:firebase-messaging:11.8.0'
     compile 'com.firebaseui:firebase-ui-database:2.3.0'
     compile 'de.hdodenhof:circleimageview:2.0.0'
-    compile group:'com.squareup.picasso', name:'picasso', version:'2.5.0'
     compile 'com.google.firebase:firebase-storage:11.8.0'
+    compile 'com.theartofdev.edmodo:android-image-cropper:2.7.+'
+    compile 'com.android.support:multidex:1.0.0'
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'jp.wasabeef:glide-transformations:2.0.2'
+    // If you want to use the GPU Filters
+    compile 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1'
     testCompile 'junit:junit:4.12'
 }
 
