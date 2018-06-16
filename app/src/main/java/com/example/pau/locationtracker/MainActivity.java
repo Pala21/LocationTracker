@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
     private DatabaseReference mDatabase;
-
+    private String id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
         //get firebase auth instance
         auth = FirebaseAuth.getInstance();
+        id = auth.getUid();
 
         //get current user
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -64,11 +65,11 @@ public class MainActivity extends AppCompatActivity {
         btnChangeEmail = (Button) findViewById(R.id.change_email_button);
         btnChangePassword = (Button) findViewById(R.id.change_password_button);
         btnSendResetEmail = (Button) findViewById(R.id.sending_pass_reset_button);
-        btnRemoveUser = (Button) findViewById(R.id.remove_user_button);
+        //btnRemoveUser = (Button) findViewById(R.id.remove_user_button);
         changeEmail = (Button) findViewById(R.id.changeEmail);
         changePassword = (Button) findViewById(R.id.changePass);
         sendEmail = (Button) findViewById(R.id.send);
-        remove = (Button) findViewById(R.id.remove);
+        //remove = (Button) findViewById(R.id.remove);
         signOut = (Button) findViewById(R.id.sign_out);
 
         oldEmail = (EditText) findViewById(R.id.old_email);
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         changeEmail.setVisibility(View.GONE);
         changePassword.setVisibility(View.GONE);
         sendEmail.setVisibility(View.GONE);
-        remove.setVisibility(View.GONE);
+        //remove.setVisibility(View.GONE);
 
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 changeEmail.setVisibility(View.VISIBLE);
                 changePassword.setVisibility(View.GONE);
                 sendEmail.setVisibility(View.GONE);
-                remove.setVisibility(View.GONE);
+                //remove.setVisibility(View.GONE);
             }
         });
 
@@ -117,10 +118,9 @@ public class MainActivity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         Toast.makeText(MainActivity.this, "Email address is updated. Please sign in with new email id!", Toast.LENGTH_LONG).show();
-                                        signOut();
-                                        mDatabase.child("users").child(FirebaseAuth.getInstance().getCurrentUser().
-                                                getUid()).child("email").setValue(newEmail.getText().toString().trim());
+                                        mDatabase.child("users").child(id).child("email").setValue(FirebaseAuth.getInstance().getCurrentUser());
                                         progressBar.setVisibility(View.GONE);
+                                        signOut();
                                     } else {
                                         Toast.makeText(MainActivity.this, "Failed to update email!", Toast.LENGTH_LONG).show();
                                         progressBar.setVisibility(View.GONE);
@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                 changeEmail.setVisibility(View.GONE);
                 changePassword.setVisibility(View.VISIBLE);
                 sendEmail.setVisibility(View.GONE);
-                remove.setVisibility(View.GONE);
+                //remove.setVisibility(View.GONE);
             }
         });
 
@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
                 changeEmail.setVisibility(View.GONE);
                 changePassword.setVisibility(View.GONE);
                 sendEmail.setVisibility(View.VISIBLE);
-                remove.setVisibility(View.GONE);
+                //remove.setVisibility(View.GONE);
             }
         });
 
@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        btnRemoveUser.setOnClickListener(new View.OnClickListener() {
+        /*btnRemoveUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 progressBar.setVisibility(View.VISIBLE);
@@ -249,8 +249,7 @@ public class MainActivity extends AppCompatActivity {
                             });
                 }
             }
-        });
-
+        });*/
 
         signOut.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -263,7 +262,9 @@ public class MainActivity extends AppCompatActivity {
 
     //sign out method
     public void signOut() {
+        stopService(new Intent(this, LocationService.class));
         auth.signOut();
+
     }
 
     @Override

@@ -14,7 +14,6 @@
     <string name="title_activity_login">Sign in</string>
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
-    <string name="hint_name">Fullname</string>
     <string name="btn_login">LOGIN</string>
     <string name="btn_link_to_register">Not a member? Get registered in LookItNow!</string>
     <string name="btn_link_to_login">Already registered. Log me in!</string>
@@ -37,19 +36,13 @@
     <string name="settings">SETTINGS</string>
     <string name="viewMap">VIEW MAP</string>
     <string name="friends">FRIENDS</string>
-    <string name="title_activity_friends">FRIENDS</string>
-    <string name="searchFriend">Search...</string>
-    <string name="name">First name</string>
-    <string name="surname">Last name</string>
-    <string name="username" />
-    <string name="fullname" />
+    <string name="username">Username</string>
+    <string name="fullname">Full Name</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_main_friends">MainActivityFriends</string>
-    <string name="title_activity_groups">GroupsActivity</string>
-    <string name="groupName" />
     <string name="groupsButtonText">GROUPS</string>
+    <string name="dialog_message">are you sure you want to delete the group?</string>
+    <string name="dialog_title">Delete</string>
 
 </resources>

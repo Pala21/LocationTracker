@@ -60,15 +60,15 @@ public class LastConfigurationCreateGroup extends AppCompatActivity {
         final List<Users> u = new ArrayList<Users>();
         final String key = GroupsReference.push().getKey();
 
-
+        System.out.println("MUSEEERS:: "+mUsers);
         allUsersReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (String user : mUsers){
 
                     for(DataSnapshot d2 : dataSnapshot.getChildren()){
-                        System.out.println("D1:: "+d2.getKey());
-                        System.out.println("D1User:: "+user);
+                        //System.out.println("D1:: "+d2.getKey());
+                        //System.out.println("D1User:: "+user);
 
                         if(d2.getKey().equals(user)){
                             System.out.println("D1D2:: "+d2.getChildren());
@@ -115,7 +115,7 @@ public class LastConfigurationCreateGroup extends AppCompatActivity {
         image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent();
+                Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 intent.setType("image/*");
                 startActivityForResult(intent, Gallery_pick);
             }

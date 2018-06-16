@@ -148,6 +148,7 @@ public class RequestFragment extends Fragment {
                             Picasso.with(ctx).load(internFields.getValue().toString()).into(image);
                         }
                     }
+
                 }
 
                 @Override
@@ -217,6 +218,7 @@ public class RequestFragment extends Fragment {
                     FriendsReferenceReceiver.child(sender_user_id).child("fullname").setValue(fullnameSender);
                     FriendsReferenceReceiver.child(sender_user_id).child("username").setValue(usernameSender);
                     FriendsReferenceReceiver.child(sender_user_id).child("image").setValue(imageSender);
+                    FriendsReferenceReceiver.child(sender_user_id).child("key").setValue(sender_user_id);
                     DatabaseReference FriendRequestReferenceReceiver = FirebaseDatabase.getInstance().getReference().child("Friend_Requests").child(receiver_user_id);
                     FriendRequestReferenceReceiver.child(sender_user_id).removeValue();
 

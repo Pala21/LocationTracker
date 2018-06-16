@@ -1,7 +1,10 @@
 package com.example.pau.locationtracker;
 
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -74,7 +77,7 @@ public class FriendsFragment extends Fragment {
                         allFriendsReference
                 ) {
             @Override
-            protected void populateViewHolder(final FriendsFragment.FriendsViewHolder viewHolder, Friends model, int position)
+            protected void populateViewHolder(final FriendsFragment.FriendsViewHolder viewHolder, final Friends model, int position)
             {
                 View view = viewHolder.mView;
                 final Button btn = view.findViewById(R.id.btn);
@@ -88,7 +91,26 @@ public class FriendsFragment extends Fragment {
                 btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        viewHolder.unfollowUser(sender_user_id, receiver_user_id);
+                        AlertDialog.Builder builder;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            builder = new AlertDialog.Builder(getContext(), android.R.style.Theme_Material_Dialog_Alert);
+                        } else {
+                            builder = new AlertDialog.Builder(getContext());
+                        }
+                        builder.setTitle("Unfollow Friend")
+                                .setMessage("Are you sure you want to Unfollow "+model.getUsername()+ "?")
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        viewHolder.unfollowUser(sender_user_id, receiver_user_id);
+                                    }
+                                })
+                                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        return;
+                                    }
+                                })
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .show();
                     }
                 });
             }

@@ -1,6 +1,8 @@
 package com.example.pau.locationtracker;
 
 import android.Manifest;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -56,22 +58,27 @@ import com.google.firebase.storage.StorageReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MapsActivity extends FragmentActivity  implements OnMapReadyCallback, LocationListener,GoogleMap.OnCameraMoveStartedListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,GoogleMap.OnCameraMoveStartedListener {
 
     final static int PERMISSION_ALL = 1;
     final static String[] PERMISSIONS = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION};
     private GoogleMap mMap;
-    private HashMap<String, Marker> mMarkers = new HashMap<>();
+    private HashMap<String, Marker> mMarkers;
     private boolean isMaptouched;
     DatabaseReference groupMembersReference;
     MarkerOptions mo;
     LocationManager locationManager;
     private DatabaseReference mDatabase;
     ArrayList<String> mUsers;
+    ArrayList<String> removedUsers;
     private FirebaseAuth mAuth;
     String id;
+    FirebaseStorage storage;
     StorageReference storageRef;
+    StorageReference storageRef1;
     String key;
+    Intent mServiceIntent;
+    Marker m;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,19 +104,38 @@ public class MapsActivity extends FragmentActivity  implements OnMapReadyCallbac
         if (!isLocationEnabled())
             showAlert(1);
 
+        mMarkers = new HashMap<>();
         groupMembersReference = FirebaseDatabase.getInstance().getReference().child("groups");
         groupMembersReference.keepSynced(true);
         key = (String) getIntent().getExtras().get("GROUPKEY");
+        storage = FirebaseStorage.getInstance();
+        storageRef1 = storage.getReferenceFromUrl("gs://ubication-project-29de0.appspot.com/");
+        storageRef = storageRef1.child("Profile_Images");
         mUsers = new ArrayList<>();
+        removedUsers = new ArrayList<String>();
 
-        storageRef = FirebaseStorage.getInstance().getReference().child("Profile_Images");
+        mServiceIntent = new Intent(MapsActivity.this, LocationService.class);
+        if (!isMyServiceRunning(LocationService.class)) {
+            startService(new Intent(this, LocationService.class));
+        }
 
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                Log.i ("isMyServiceRunning?", true+"");
+                return true;
+            }
+        }
+        Log.i ("isMyServiceRunning?", false+"");
+        return false;
     }
 
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
-
         groupMembersReference.child(key).child("usersId").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -118,8 +144,15 @@ public class MapsActivity extends FragmentActivity  implements OnMapReadyCallbac
                         System.out.println("D3 :: "+d3.getKey() + " "+d3.getValue());
                         if(d3.getKey().equals("visibility")){
                             if(d3.getValue().equals(true)){
-                                mUsers.add((String) d2.getKey());
+                                if(!mUsers.contains(d2.getKey())){
+                                    mUsers.add((String) d2.getKey());
+                                }
+                                if(removedUsers.contains(d2.getKey()))
+                                    removedUsers.remove(d2.getKey());
+                            }else if(d3.getValue().equals(false) && mUsers.contains(d2.getKey())){
+                                removedUsers.add(d2.getKey());
                             }
+
                         }
                     }
                 }
@@ -136,8 +169,6 @@ public class MapsActivity extends FragmentActivity  implements OnMapReadyCallbac
                 for (final DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                     if (dataSnapshot1.hasChildren()) {
                         final String key = dataSnapshot1.getKey();
-                        System.out.println("KEYs:: "+dataSnapshot1.getKey());
-                        System.out.println("mUSERSS AND KEY:: "+mUsers + " "+key);
                         if(mUsers.contains(key)){
                             mDatabase.child("users").addValueEventListener(new ValueEventListener() {
                                 @Override
@@ -148,12 +179,52 @@ public class MapsActivity extends FragmentActivity  implements OnMapReadyCallbac
                                             Double lon = (Double) dataSnapshot1.child("loc").child("longitude").getValue();
                                             final LatLng coord = new LatLng(lat, lon);
 
-
                                             StorageReference filePath = storageRef.child(key+".jpg");
-                                            System.out.println("FILEPATH ::"+filePath.getName());
+                                            //user amb foto de perfil
+                                            filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                @Override
+                                                public void onSuccess(Uri uri) {
+                                                    ColorDrawable cd = new ColorDrawable(ContextCompat.getColor(MapsActivity.this, R.color.colorPrimaryDark));
+                                                    Glide.with(getApplicationContext())
+                                                            .load(uri.toString())
+                                                            .asBitmap()
+                                                            .listener(new RequestListener<String, Bitmap>() {
+                                                                @Override
+                                                                public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
+                                                                    return false;
+                                                                }
 
-                                            //user sense foto de perfil
-                                            filePath.getDownloadUrl().addOnFailureListener(new OnFailureListener() {
+                                                                @Override
+                                                                public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                                                    Bitmap resizedBitmap = Bitmap.createScaledBitmap(resource, 110, 110, false);
+                                                                    Bitmap circle = getCroppedBitmap(resizedBitmap);
+                                                                    mo = (new MarkerOptions()
+                                                                            .position(coord)
+                                                                            .title((String) dataSnapshot2.child("username").getValue())
+                                                                            .snippet((String) dataSnapshot2.child("fullname").getValue())
+                                                                            .icon(BitmapDescriptorFactory.fromBitmap(circle))
+                                                                    );
+
+                                                                     if (!mMarkers.containsKey(key)) {
+                                                                         m = mMap.addMarker(mo);
+                                                                         mMarkers.put(key, m);
+                                                                     }else{
+                                                                         if(removedUsers.contains(key) && mMarkers.get(key).isVisible()){
+                                                                             mMarkers.get(key).setVisible(false);
+                                                                         }else if(!removedUsers.contains(key) && !mMarkers.get(key).isVisible()){
+                                                                             mMarkers.get(key).setVisible(true);
+                                                                         }
+                                                                         mMarkers.get(key).setPosition(coord);
+                                                                     }
+
+                                                                    return true;
+                                                                }
+                                                            })
+                                                            .placeholder(cd)
+                                                            .centerCrop()
+                                                            .preload();
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
                                                 @Override
                                                 public void onFailure(@NonNull Exception e) {
                                                     Bitmap icon = BitmapFactory.decodeResource(getApplicationContext().getResources(),
@@ -166,65 +237,19 @@ public class MapsActivity extends FragmentActivity  implements OnMapReadyCallbac
                                                             getValue()).icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap));
 
                                                     if (!mMarkers.containsKey(key)) {
-                                                        mMarkers.put(key, mMap.addMarker(mo));
-                                                    } else {
-                                                        System.out.println(key);
+                                                        m = mMap.addMarker(mo);
+                                                        mMarkers.put(key, m);
+                                                    }else{
+                                                        if(removedUsers.contains(key) && mMarkers.get(key).isVisible()){
+                                                            mMarkers.get(key).setVisible(false);
+                                                        }else if(!removedUsers.contains(key) && !mMarkers.get(key).isVisible()){
+                                                            mMarkers.get(key).setVisible(true);
+                                                        }
                                                         mMarkers.get(key).setPosition(coord);
                                                     }
+
                                                 }
                                             });
-
-                                            //user amb foto de perfil
-                                            filePath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                                @Override
-                                                public void onSuccess(Uri uri) {
-                                                    ColorDrawable cd = new ColorDrawable(ContextCompat.getColor(MapsActivity.this, R.color.colorPrimaryDark));
-                                                    Glide.with(getApplicationContext())
-                                                            .load(uri.toString())
-                                                            .asBitmap()
-                                                            .listener(new RequestListener<String, Bitmap>() {
-                                                                @Override
-                                                                public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
-                                                                    System.out.println("Entra error");
-                                                                    return false;
-                                                                }
-
-                                                                @Override
-                                                                public boolean onResourceReady(Bitmap resource, String model, Target<Bitmap> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                                                    System.out.println("Entra ok");
-                                                                    Bitmap resizedBitmap = Bitmap.createScaledBitmap(resource, 110, 110, false);
-                                                                    Bitmap circle = getCroppedBitmap(resizedBitmap);
-                                                                    mo = (new MarkerOptions()
-                                                                            .position(coord)
-                                                                            .title((String) dataSnapshot2.child("username").getValue())
-                                                                            .snippet((String) dataSnapshot2.child("fullname").getValue())
-                                                                            .icon(BitmapDescriptorFactory.fromBitmap(circle))
-                                                                    );
-
-
-                                                                    if (!mMarkers.containsKey(key)) {
-                                                                        mMarkers.put(key, mMap.addMarker(mo));
-                                                                    } else {
-                                                                        System.out.println(key);
-                                                                        mMarkers.get(key).setPosition(coord);
-                                                                    }
-                                                                    return true;
-                                                                }
-                                                            })
-                                                            .placeholder(cd)
-                                                            .centerCrop()
-                                                            .preload();
-                                                }
-                                            });
-
-                                           /* mo = new MarkerOptions().position(coord).title((String) dataSnapshot2.child("username")
-                                                .getValue()).snippet((String) dataSnapshot2.child("fullname").getValue());
-                                            if (!mMarkers.containsKey(key)) {
-                                                mMarkers.put(key, mMap.addMarker(mo));
-                                            } else {
-                                                System.out.println(key);
-                                                mMarkers.get(key).setPosition(coord);
-                                            }*/
                                         }
                                     }
                                 }
@@ -244,43 +269,6 @@ public class MapsActivity extends FragmentActivity  implements OnMapReadyCallbac
             }
 
         });
-
-
-
-        /*mDatabase.child("locations").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (final DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
-                    if(dataSnapshot1.hasChildren()) {
-                        final String key = dataSnapshot1.getKey();
-                        mDatabase.child("users").addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                for(DataSnapshot dataSnapshot2 : dataSnapshot.getChildren()) {
-                                    if (key.equals(dataSnapshot2.getKey())) {
-                                        Double lat = (Double) dataSnapshot1.child("loc").child("latitude").getValue();
-                                        Double lon = (Double) dataSnapshot1.child("loc").child("longitude").getValue();
-                                        LatLng coord = new LatLng(lat, lon);
-                                        mo = new MarkerOptions().position(coord).title("User " + dataSnapshot2.child("email").child("email").getValue());
-
-                                        if (!mMarkers.containsKey(key)) {
-                                            mMarkers.put(key, mMap.addMarker(mo));
-                                        } else {
-                                            System.out.println(key);
-                                            mMarkers.get(key).setPosition(coord);
-                                        }
-                                    }
-                                }
-                            }
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {}
-                        });
-                    }
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });*/
 
         //per quan carregui de principi que es possi en l'última posició.
         final DatabaseReference m = mDatabase.child("locations").child(id);
@@ -349,8 +337,8 @@ public class MapsActivity extends FragmentActivity  implements OnMapReadyCallbac
 
     @Override
     public void onLocationChanged(final Location location) {
-        final LatLng myCoordinates = new LatLng(location.getLatitude(), location.getLongitude());
-        mDatabase.child("locations").child(id).child("loc").setValue(myCoordinates);
+       /* final LatLng myCoordinates = new LatLng(location.getLatitude(), location.getLongitude());
+        mDatabase.child("locations").child(id).child("loc").setValue(myCoordinates);*/
 
         mMap.setOnCameraMoveStartedListener(this);
 
@@ -366,23 +354,20 @@ public class MapsActivity extends FragmentActivity  implements OnMapReadyCallbac
 
     @Override
     public void onStatusChanged(String s, int i, Bundle bundle) {
-
     }
 
     @Override
     public void onProviderEnabled(String s) {
-
     }
 
     @Override
     public void onProviderDisabled(String s) {
-
+       // gps.stopUsingGPS();
     }
 
     private void requestLocation() {
         Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        criteria.setPowerRequirement(Criteria.POWER_HIGH);
         String provider = locationManager.getBestProvider(criteria, true);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED &&
@@ -506,7 +491,6 @@ public class MapsActivity extends FragmentActivity  implements OnMapReadyCallbac
         }
     }
 }
-
 
 
 

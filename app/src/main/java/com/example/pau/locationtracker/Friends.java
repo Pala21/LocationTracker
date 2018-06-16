@@ -23,13 +23,11 @@ public class Friends {
 
     public void setFullname(String fullname)
     {
-
         this.fullname = fullname;
     }
 
     public String getUsername()
     {
-
         return username;
     }
 
@@ -41,15 +39,10 @@ public class Friends {
 
     public String getUserImage()
     {
-
         return image;
     }
 
-    public String getKey()
-    {
-
-        return key;
-    }
+    public String getKey() { return key; }
 
     public void setUserImage(String image)
 

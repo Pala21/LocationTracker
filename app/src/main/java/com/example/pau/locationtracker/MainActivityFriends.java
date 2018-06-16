@@ -38,39 +38,6 @@ public class MainActivityFriends extends AppCompatActivity{
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("Friends");
 
-        /*myViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener(){
-
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                System.out.println("POSITION:: "+position);
-                switch(position)
-                {
-                    case 1:
-                        getSupportActionBar().setTitle("Friends");
-                        break;
-                    case 2:
-                        getSupportActionBar().setTitle("Requests");
-                        break;
-                    case 3:
-                        getSupportActionBar().setTitle("Search Friends");
-                        break;
-                    default:
-                        getSupportActionBar().setTitle("Friends");
-
-
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });*/
 
     }
 

@@ -1,8 +1,11 @@
 package com.example.pau.locationtracker;
 
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -166,7 +169,26 @@ public class AddFriendFragment extends Fragment implements SearchView.OnQueryTex
                             }
                             else
                             {
-                                viewHolder.RemoveFriendToFriends(receiver_user_id,sender_user_id);
+                                AlertDialog.Builder builder;
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                    builder = new AlertDialog.Builder(getContext(), android.R.style.Theme_Material_Dialog_Alert);
+                                } else {
+                                    builder = new AlertDialog.Builder(getContext());
+                                }
+                                builder.setTitle("Unfollow Friend")
+                                        .setMessage("Are you sure you want to Unfollow "+model.getUsername()+ "?")
+                                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                viewHolder.RemoveFriendToFriends(receiver_user_id,sender_user_id);
+                                            }
+                                        })
+                                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                return;
+                                            }
+                                        })
+                                        .setIcon(android.R.drawable.ic_dialog_alert)
+                                        .show();
                             }
                         }
                     });
@@ -266,8 +288,6 @@ public class AddFriendFragment extends Fragment implements SearchView.OnQueryTex
         {
             super(itemView);
             mView = itemView;
-
-
         }
 
         public void setVis()
@@ -432,6 +452,7 @@ public class AddFriendFragment extends Fragment implements SearchView.OnQueryTex
         }
 
         public void bind(Users user) {
+            System.out.println("User ::"+user);
             userN.setText(user.getUsername());
             fullN.setText(user.getFullname());
             setUserImage(user.getUserImage(),mView.getContext());

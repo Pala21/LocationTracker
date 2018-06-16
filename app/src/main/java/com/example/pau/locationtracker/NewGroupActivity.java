@@ -50,14 +50,12 @@ public class NewGroupActivity extends AppCompatActivity {
         allUsersList = findViewById(R.id.all_users_group_list);
         allUsersList.setLayoutManager(new LinearLayoutManager(this));
         mAuth = FirebaseAuth.getInstance();
-
+        mUsers = new ArrayList<>();
     }
 
     protected void onStart()
     {
         super.onStart();
-
-        mUsers = new ArrayList<>();
         firebaseRecyclerAdapterGroups = new FirebaseRecyclerAdapter<Friends, AllUsersViewHolder>
                 (
                         Friends.class,
@@ -70,25 +68,26 @@ public class NewGroupActivity extends AppCompatActivity {
             @Override
             protected void populateViewHolder(final AllUsersViewHolder viewHolder, final Friends model, final int position) {
 
-                    final View view = viewHolder.mView;
-                    final CheckBox chekcb = view.findViewById(R.id.checkBox);
-                    viewHolder.setUsername(model.getUsername());
-                    viewHolder.setFullname(model.getFullname());
-                    if (model.getUserImage() != null)
-                        viewHolder.setUserImage(model.getUserImage(), getApplicationContext());
+                final View view = viewHolder.mView;
+                final CheckBox chekcb = view.findViewById(R.id.checkBox);
+                viewHolder.setUsername(model.getUsername());
+                viewHolder.setFullname(model.getFullname());
+                if (model.getUserImage() != null)
+                    viewHolder.setUserImage(model.getUserImage(), getApplicationContext());
 
-                    chekcb.setOnClickListener(new View.OnClickListener() {
+                System.out.println("Model:: "+ model.getUsername() +" "+model.getFullname()+" "+model.getKey());
+                chekcb.setOnClickListener(new View.OnClickListener() {
 
-                        @Override
-                        public void onClick(View view) {
-                            if (chekcb.isChecked()) {
-                                mUsers.add(model.getKey());
-
-                            } else {
-                                mUsers.remove(model.getKey());
-                            }
+                    @Override
+                    public void onClick(View view) {
+                        if (chekcb.isChecked()) {
+                            mUsers.add(model.getKey());
+                            System.out.println("mUseeers:: "+mUsers);
+                        } else {
+                            mUsers.remove(model.getKey());
                         }
-                    });
+                    }
+                });
             }
         };
         allUsersList.setAdapter(firebaseRecyclerAdapterGroups);

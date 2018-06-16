@@ -1,6 +1,7 @@
 package com.example.pau.locationtracker;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -13,11 +14,13 @@ public class MenuActivity extends FragmentActivity {
 
     private ImageButton btnSeeMap, btnSettings, btnFriends , btnProfile, groupsButton;
     private AlphaAnimation buttonClick = new AlphaAnimation(10F, 0.8F);
-
+    public static Context mContext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
+
+        mContext = this;
 
         btnSeeMap = (ImageButton) findViewById(R.id.LocationButton);
         btnSeeMap.setOnClickListener(new View.OnClickListener() {
@@ -66,7 +69,6 @@ public class MenuActivity extends FragmentActivity {
             @Override
             public void onClick(View view) {
                 view.startAnimation(buttonClick);
-                //Intent intent = new Intent(MenuActivity.this, MainActivity.class);
                 Intent intent = new Intent(MenuActivity.this, GroupsActivity .class);
                 MenuActivity.this.startActivity(intent);
             }

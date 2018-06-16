@@ -1,6 +1,9 @@
 package com.example.pau.locationtracker;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -120,18 +123,44 @@ public class adapterUsers extends RecyclerView.Adapter<AddFriendFragment.UsersVi
                     if(btn.getText().equals("Follow"))
                     {
                         holder.SendFriendRequestToAFriend(receiver_user_id, sender_user_id);
+                        notifyDataSetChanged();
+
                     }
                     else if(btn.getText().equals("Pending")){
                         holder.RemoveFriendRequestToAFriend(receiver_user_id, sender_user_id);
+                        notifyDataSetChanged();
+
                     }
                     else
                     {
-                        holder.RemoveFriendToFriends(receiver_user_id,sender_user_id);
+                        AlertDialog.Builder builder;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            builder = new AlertDialog.Builder(context, android.R.style.Theme_Material_Dialog_Alert);
+                        } else {
+                            builder = new AlertDialog.Builder(context);
+                        }
+                        builder.setTitle("Unfollow Friend")
+                                .setMessage("Are you sure you want to Unfollow "+model.getUsername()+ "?")
+                                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        holder.RemoveFriendToFriends(receiver_user_id,sender_user_id);
+                                        notifyDataSetChanged();
+
+                                    }
+                                })
+                                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        return;
+                                    }
+                                })
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .show();
                     }
                 }
             });
 
-            holder.bind(user);
+            //això ha de quedar comentat, sinò la lupa falla.
+            // holder.bind(user);
         }
     }
 
@@ -139,7 +168,7 @@ public class adapterUsers extends RecyclerView.Adapter<AddFriendFragment.UsersVi
 
     @Override
     public int getItemCount() {
-            return mUsers.size();
+        return mUsers.size();
     }
 
     public void setFilter(List<Users> users) {

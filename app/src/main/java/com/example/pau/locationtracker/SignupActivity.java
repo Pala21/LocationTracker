@@ -67,8 +67,8 @@ public class SignupActivity extends AppCompatActivity {
 
                 String email = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
-                final String name = inputFullName.getText().toString();
-                final String username = inputUsername.getText().toString();
+                final String name = inputFullName.getText().toString().trim();
+                final String username = inputUsername.getText().toString().trim();
 
                 if (TextUtils.isEmpty(email)) {
                     Toast.makeText(getApplicationContext(), "Enter email address...", Toast.LENGTH_SHORT).show();
